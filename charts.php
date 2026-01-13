@@ -6,7 +6,7 @@ if(!isset($_SESSION['admin_id'])){
     exit;
 }
 
-// Fetch total food & plastic waste per date
+
 $result = $conn->query("SELECT date, SUM(food_waste_kg) AS food_total, SUM(plastic_waste_kg) AS plastic_total
                         FROM WasteEntry
                         GROUP BY date

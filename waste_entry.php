@@ -4,10 +4,18 @@ if(!isset($_SESSION['admin_id'])){
     header("Location: login.php");
     exit;
 }
-include 'db.php'; // connects to database
+include 'db.php'; 
 
-// Fetch canteens from database to populate dropdown
-$canteens = $conn->query("SELECT canteen_id, name FROM Canteen ORDER BY name");
+
+$cid = $_SESSION['college_id'] ?? null;
+
+if($_SESSION['role'] === 'superadmin' || $cid === null){
+    
+    $canteens = $conn->query("SELECT canteen_id, name FROM Canteen ORDER BY name");
+} else {
+    
+    $canteens = $conn->query("SELECT canteen_id, name FROM Canteen WHERE college_id = ".(int)$cid." ORDER BY name");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

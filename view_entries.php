@@ -1,5 +1,5 @@
 <?php
-// Enable error reporting
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -7,17 +7,17 @@ error_reporting(E_ALL);
 session_start();
 include 'db.php';
 
-// Session check: only logged-in admins
+
 if(!isset($_SESSION['admin_id'])){
     header("Location: login.php");
     exit;
 }
 
-// Threshold limits
-$food_threshold = 20;  // kg
-$plastic_threshold = 5; // kg
 
-// Fetch alerts for high waste
+$food_threshold = 20;  
+$plastic_threshold = 5; 
+
+
 $alerts = [];
 $alert_result = $conn->query("SELECT date, food_waste_kg, plastic_waste_kg, c.name AS canteen_name
                               FROM WasteEntry w
@@ -31,11 +31,24 @@ if($alert_result){
     }
 }
 
-// Fetch all waste entries for table
-$result = $conn->query("SELECT w.entry_id, w.date, w.food_waste_kg, w.plastic_waste_kg, c.name AS canteen_name
-                        FROM WasteEntry w
-                        LEFT JOIN Canteen c ON w.canteen_id = c.canteen_id
-                        ORDER BY date DESC");
+
+$cid = $_SESSION['college_id'] ?? null;
+$role = $_SESSION['role'] ?? 'admin'; 
+
+if($role === 'superadmin' || $cid === null){
+    
+    $result = $conn->query("SELECT w.entry_id, w.date, w.food_waste_kg, w.plastic_waste_kg, c.name AS canteen_name  
+                            FROM WasteEntry w  
+                            LEFT JOIN Canteen c ON w.canteen_id = c.canteen_id  
+                            ORDER BY w.date DESC");
+} else {
+    
+    $result = $conn->query("SELECT w.entry_id, w.date, w.food_waste_kg, w.plastic_waste_kg, c.name AS canteen_name  
+                            FROM WasteEntry w  
+                            LEFT JOIN Canteen c ON w.canteen_id = c.canteen_id  
+                            WHERE c.college_id = ".(int)$cid."  
+                            ORDER BY w.date DESC");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
