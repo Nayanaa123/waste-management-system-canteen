@@ -198,15 +198,28 @@ Use credentials stored in the admin table to log in.
 10. Screenshots
 
 
-- Login Page
 
-  ![Login](
-- Dashboard
-- Add Waste Entry
-- View Entries
-- Charts
-- Leaderboard
 
+### Login Page
+![Login](screenshots/login.png)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Add Waste Entry
+![Add Entry](screenshots/add_entry.png)
+
+### View Entries
+![View Entries](screenshots/view_entries.png)
+
+### Charts
+![Charts](screenshots/charts.png)
+
+### Leaderboard
+![Leaderboard](screenshots/leaderboard.png)
+
+### Recommendation System
+![Recommendation](screenshots/recommendation.png)
 ---
 
 11. Challenges Faced
