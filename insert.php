@@ -1,28 +1,39 @@
 <?php
-session_start();
-if(!isset($_SESSION['admin_id'])){
-    header("Location: login.php");
-    exit;
-}
 include 'db.php';
-ini_set('display_errors',1); error_reporting(E_ALL);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $date = $_POST['date'];
-    $food = $_POST['food_waste'];
-    $plastic = $_POST['plastic_waste'];
-    $canteen = $_POST['canteen_id'];
+if($_SERVER['REQUEST_METHOD']=='POST'){
+    $canteen_id = $_POST['canteen_id'];
+    $food = $_POST['food'];
+    $plastic = $_POST['plastic'];
 
-    $stmt = $conn->prepare("INSERT INTO WasteEntry (date, food_waste_kg, plastic_waste_kg, canteen_id) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sddi", $date, $food, $plastic, $canteen);
+    $conn->query("INSERT INTO wasteentry (canteen_id,food_waste_kg,plastic_waste_kg)
+                  VALUES ($canteen_id,$food,$plastic)");
 
-    if ($stmt->execute()) {
-        header("Location: view_entries.php?added=1");
-        exit;
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-} else {
-    echo "Invalid request.";
+    echo "✅ Data Inserted!";
 }
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>Manual Insert</h2>
+
+<form method="POST">
+<input type="number" name="canteen_id" placeholder="Canteen ID" required>
+<input type="number" name="food" placeholder="Food Waste" required>
+<input type="number" name="plastic" placeholder="Plastic Waste" required>
+<button>Insert</button>
+</form>
+
+</div>
+</div>
+
+</body>
+</html>

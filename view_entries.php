@@ -1,121 +1,92 @@
 <?php
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 include 'db.php';
 
+$role = $_SESSION['role'];
+$admin_id = $_SESSION['admin_id'];
 
-if(!isset($_SESSION['admin_id'])){
-    header("Location: login.php");
-    exit;
-}
-
-
-$food_threshold = 20;  
-$plastic_threshold = 5; 
-
-
-$alerts = [];
-$alert_result = $conn->query("SELECT date, food_waste_kg, plastic_waste_kg, c.name AS canteen_name
-                              FROM WasteEntry w
-                              LEFT JOIN Canteen c ON w.canteen_id = c.canteen_id
-                              WHERE food_waste_kg > $food_threshold OR plastic_waste_kg > $plastic_threshold
-                              ORDER BY date DESC");
-
-if($alert_result){
-    while($row = $alert_result->fetch_assoc()){
-        $alerts[] = "High waste on {$row['date']} in {$row['canteen_name']}: Food={$row['food_waste_kg']}kg, Plastic={$row['plastic_waste_kg']}kg";
-    }
-}
-
-
-$cid = $_SESSION['college_id'] ?? null;
-$role = $_SESSION['role'] ?? 'admin'; 
-
-if($role === 'superadmin' || $cid === null){
-    
-    $result = $conn->query("SELECT w.entry_id, w.date, w.food_waste_kg, w.plastic_waste_kg, c.name AS canteen_name  
-                            FROM WasteEntry w  
-                            LEFT JOIN Canteen c ON w.canteen_id = c.canteen_id  
-                            ORDER BY w.date DESC");
+if($role=='mainadmin'){
+    $result = $conn->query("
+    SELECT w.*,c.canteen_name
+    FROM wasteentry w
+    JOIN canteen c ON w.canteen_id=c.canteen_id
+    ");
 } else {
-    
-    $result = $conn->query("SELECT w.entry_id, w.date, w.food_waste_kg, w.plastic_waste_kg, c.name AS canteen_name  
-                            FROM WasteEntry w  
-                            LEFT JOIN Canteen c ON w.canteen_id = c.canteen_id  
-                            WHERE c.college_id = ".(int)$cid."  
-                            ORDER BY w.date DESC");
+    $stmt=$conn->prepare("
+    SELECT w.*,c.canteen_name
+    FROM wasteentry w
+    JOIN canteen c ON w.canteen_id=c.canteen_id
+    WHERE c.admin_id=?
+    ");
+    $stmt->bind_param("i",$admin_id);
+    $stmt->execute();
+    $result=$stmt->get_result();
 }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>View Entries - Waste Management</title>
-<style>
-body{font-family:Arial;background:#fff6f0;margin:0;padding:20px;}
-table{border-collapse:collapse;width:100%;max-width:900px;margin:12px auto;background:#fff;}
-th,td{border:1px solid #ddd;padding:8px;text-align:left;}
-th{background:#f4f4f4;}
-.top{max-width:900px;margin:8px auto;display:flex;justify-content:space-between;align-items:center;}
-a.button{background:#28a745;color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none;}
-a.delete{background:#ff4d4d;color:#fff;padding:4px 8px;border-radius:4px;text-decoration:none;}
-.alert-box{max-width:900px;margin:10px auto;padding:12px;background:#ffdddd;color:#a00;border-radius:6px;}
-p.empty{text-align:center;color:#555;font-style:italic;}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="top">
-  <h2 style="margin-left:8px">Waste Entries</h2>
-  <div style="margin-right:8px">
-    <a class="button" href="waste_entry.php">Add Entry</a>
-    <a class="button" href="dashboard.php">Dashboard</a>
-    <a class="button" href="charts.php">View Charts</a>
-    <a class="delete" href="delete_entry.php?id=<?php echo $row['entry_id']; ?>" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</a>
-  </div>
-</div>
+<div class="container">
+<div class="card">
 
-<!-- Threshold Alerts -->
-<?php if(!empty($alerts)): ?>
-  <div class="alert-box">
-    <strong>⚠ High Waste Alerts:</strong>
-    <ul>
-      <?php foreach($alerts as $alert): ?>
-        <li><?php echo $alert; ?></li>
-      <?php endforeach; ?>
-    </ul>
-  </div>
-<?php endif; ?>
+<h2>Waste Entries</h2>
+<style>
+    .alert-high { background: #ff4d4d; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+    .status-ok { color: #28b485; }
+</style>
 
-<!-- Entries Table -->
-<?php if($result && $result->num_rows > 0): ?>
 <table>
 <tr>
-    <th>Date</th>
-    <th>Canteen</th>
-    <th>Food (kg)</th>
-    <th>Plastic (kg)</th>
-    <th>Actions</th>
+<th>ID</th>
+<th>Date</th>
+<th>Canteen</th>
+<th>Food</th>
+<th>Plastic</th>
+<th>Action</th>
 </tr>
-<?php while($row = $result->fetch_assoc()): ?>
+
+<?php while($row=$result->fetch_assoc()): ?>
+    <?php 
+    // Logic: Is this specific entry high?
+    $is_high = ($row['food_waste_kg'] > 50 || $row['plastic_waste_kg'] > 20);
+?>
+<tr style="<?php echo $is_high ? 'background: #3a1a1a;' : ''; ?>">
 <tr>
-    <td><?php echo htmlspecialchars($row['date']); ?></td>
-    <td><?php echo htmlspecialchars($row['canteen_name'] ?? 'Unknown'); ?></td>
-    <td><?php echo htmlspecialchars($row['food_waste_kg']); ?></td>
-    <td><?php echo htmlspecialchars($row['plastic_waste_kg']); ?></td>
+<td><?php echo $row['entry_id']; ?></td>
+<td><?php echo $row['entry_date']; ?></td>
+<td><?php echo $row['canteen_name']; ?></td>
+<td><?php echo $row['food_waste_kg']; ?></td>
+<td><?php echo $row['plastic_waste_kg']; ?></td>
+<td>
+    <?php 
+    $is_high = ($row['food_waste_kg'] > 50 || $row['plastic_waste_kg'] > 20);
+    if($is_high): 
+    ?>
+        <a href="recommendation.php?id=<?php echo $row['entry_id']; ?>" 
+           style="background: #ff4d4d; color: white; padding: 8px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+           ⚠️ HIGH: Get Advice
+        </a>
+    <?php else: ?>
+        <span style="color: #28b485;">✅ Normal</span>
+    <?php endif; ?>
+</td>
     <td>
-      <a class="delete" href="delete_entry.php?id=<?php echo $row['entry_id']; ?>" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</a>
-    </td>
+<a class="delete" href="delete_entry.php?id=<?php echo $row['entry_id']; ?>">Delete</a>
+</td>
 </tr>
 <?php endwhile; ?>
+
 </table>
-<?php else: ?>
-<p class="empty">No waste entries found. Please <a href="waste_entry.php">add a new entry</a>.</p>
-<?php endif; ?>
+
+<a href="dashboard.php">⬅ Back</a>
+
+</div>
+</div>
 
 </body>
 </html>

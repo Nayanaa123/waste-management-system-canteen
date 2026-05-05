@@ -1,80 +1,100 @@
 <?php
 session_start();
 include 'db.php';
+
+// Check login
 if(!isset($_SESSION['admin_id'])){
     header("Location: login.php");
     exit;
 }
 
+// FETCH TOTAL WASTE PER CANTEEN
+$query = "SELECT c.canteen_name, 
+          SUM(w.food_waste_kg) as food, 
+          SUM(w.plastic_waste_kg) as plastic 
+          FROM wasteentry w 
+          JOIN canteen c ON w.canteen_id = c.canteen_id 
+          GROUP BY c.canteen_name";
 
-$result = $conn->query("SELECT date, SUM(food_waste_kg) AS food_total, SUM(plastic_waste_kg) AS plastic_total
-                        FROM WasteEntry
-                        GROUP BY date
-                        ORDER BY date ASC");
+$result = $conn->query($query);
 
-$dates = [];
-$food = [];
-$plastic = [];
+$labels = [];
+$foodData = [];
+$plasticData = [];
 
-while($row = $result->fetch_assoc()){
-    $dates[] = $row['date'];
-    $food[] = (float)$row['food_total'];
-    $plastic[] = (float)$row['plastic_total'];
+while($row = $result->fetch_assoc()) {
+    $labels[] = $row['canteen_name'];
+    $foodData[] = $row['food'];
+    $plasticData[] = $row['plastic'];
 }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Waste Trends</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-body{font-family:Arial;margin:0;padding:20px;background:#f9f9f9;}
-.container{max-width:800px;margin:0 auto;}
-h2{text-align:center;}
-canvas{background:#fff;border-radius:8px;padding:16px;box-shadow:0 6px 12px rgba(0,0,0,0.1);}
-a{display:block;text-align:center;margin-top:16px;color:#28a745;text-decoration:none;}
-</style>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
 <div class="container">
-<h2>Food & Plastic Waste Trends</h2>
-<canvas id="wasteChart"></canvas>
-<a href="dashboard.php">← Back to Dashboard</a>
+    <div class="card">
+        <h1>📊 Waste Analytics</h1>
+        
+        <div class="chart-wrapper">
+            <canvas id="wasteChart"></canvas>
+        </div>
+
+        <br><br>
+        <a href="dashboard.php">⬅ Back to Dashboard</a>
+    </div>
 </div>
 
 <script>
 const ctx = document.getElementById('wasteChart').getContext('2d');
 const wasteChart = new Chart(ctx, {
-    type: 'line',
+    type: 'bar', // 'bar' for vertical, 'line' for a graph line
     data: {
-        labels: <?php echo json_encode($dates); ?>,
+        labels: <?php echo json_encode($labels); ?>,
         datasets: [
             {
                 label: 'Food Waste (kg)',
-                data: <?php echo json_encode($food); ?>,
-                borderColor: 'rgba(255,99,132,1)',
-                backgroundColor: 'rgba(255,99,132,0.2)',
-                fill:true,
-                tension:0.2
+                data: <?php echo json_encode($foodData); ?>,
+                backgroundColor: 'rgba(40, 180, 133, 0.8)', // Green
+                borderColor: '#28b485',
+                borderWidth: 1
             },
             {
                 label: 'Plastic Waste (kg)',
-                data: <?php echo json_encode($plastic); ?>,
-                borderColor: 'rgba(54,162,235,1)',
-                backgroundColor: 'rgba(54,162,235,0.2)',
-                fill:true,
-                tension:0.2
+                data: <?php echo json_encode($plasticData); ?>,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)', // Blue
+                borderColor: '#36a2eb',
+                borderWidth: 1
             }
         ]
     },
-    options: {
-        responsive:true,
-        scales: {
-            y: { beginAtZero:true }
+    // Update only the "options" part of your Chart.js code:
+options: {
+    responsive: true,
+    maintainAspectRatio: false, // THIS IS THE KEY TO STOP OVERSIZING
+    plugins: {
+        legend: { labels: { color: 'white', font: { size: 16 } } }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            ticks: { color: 'white', font: { size: 14 } },
+            grid: { color: '#444' }
+        },
+        x: {
+            ticks: { color: 'white', font: { size: 14 } },
+            grid: { color: '#444' }
         }
     }
+}
+    
 });
 </script>
+
 </body>
 </html>

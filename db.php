@@ -1,17 +1,7 @@
 <?php
+$conn = new mysqli("localhost","root","","waste_canteen_system");
 
-
-$servername = "localhost"; 
-$username = "root";         
-$password = "";             
-$dbname = "WasteManagement"; 
-
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-
-if ($conn->connect_error) {
+if($conn->connect_error){
     die("Connection failed: " . $conn->connect_error);
 }
-
 ?>

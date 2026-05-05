@@ -1,4 +1,10 @@
+
 <?php
 include 'db.php';
-echo "DB connected OK";
+
+if($conn){
+    echo "✅ Database Connected Successfully!";
+} else {
+    echo "❌ Connection Failed!";
+}
 ?>

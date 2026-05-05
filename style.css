@@ -1,0 +1,178 @@
+/* --- RESET & CORE STYLES --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    color: white;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* --- FULL SCREEN WAVY BACKGROUND --- */
+body {
+    display: flex;
+    flex-direction: column;
+    /* Use the path to your image folder */
+    background-image: url('image/ima.jpeg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- TRANSPARENT CARD SYSTEM --- */
+.card {
+    flex: 1;
+    width: 100%;
+    background: rgba(15, 15, 15, 0.85); /* Slightly darker for better contrast */
+    padding: 50px;
+    border-radius: 0;
+    border: none;
+}
+
+/* --- PROFESSIONAL HEADER (Blue Theme) --- */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #00d4ff; /* New Electric Blue Line */
+}
+
+h1, h2 {
+    color: #00d4ff; /* Blue Titles */
+    font-size: 3rem;
+    border: none; /* Removed the old green border-bottom */
+}
+
+.logout-btn {
+    background: #ff4d4d; /* Kept Red for safety/visibility */
+    color: white !important;
+    padding: 15px 35px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.4rem !important;
+    transition: 0.3s;
+}
+
+/* --- TABLES (View Entries / Leaderboard) --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    font-size: 1.2rem;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+th {
+    background: #0077b6; /* Darker Blue for Headers */
+    color: white;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+td {
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+tr:nth-child(even) {
+    background: rgba(0, 119, 182, 0.1); /* Subtle blue tint on rows */
+}
+
+/* --- FORMS & BUTTONS --- */
+input, select {
+    width: 100%;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: rgba(30, 30, 30, 0.9);
+    border: 1px solid #00d4ff; /* Blue Border */
+    color: white;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+button {
+    width: 100%;
+    padding: 20px;
+    background: #00d4ff; /* Blue Button */
+    color: #000; /* Black text on blue button looks sharper */
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0077b6;
+    color: white;
+}
+
+/* --- DASHBOARD LINKS --- */
+.dashboard-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.dashboard-links a {
+    color: #00d4ff; /* Blue Links */
+    text-decoration: none;
+    font-size: 1.6rem;
+    font-weight: 500;
+    display: block;
+    width: fit-content;
+    padding: 10px 0;
+    transition: 0.2s;
+}
+
+.dashboard-links a:hover {
+    padding-left: 10px; /* Slight move effect */
+    color: white;
+}
+
+/* --- SMART RECOMMENDATIONS --- */
+.recommendation-list li {
+    background: rgba(20, 20, 20, 0.9);
+    margin-bottom: 20px;
+    padding: 30px;
+    border-left: 10px solid #00d4ff; /* Blue accent line */
+    font-size: 1.8rem;
+    border-radius: 0 10px 10px 0;
+}
+
+/* --- CHART & BACK BUTTONS --- */
+.chart-wrapper {
+    width: 100%;
+    height: 55vh;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #333;
+    padding: 20px;
+}
+
+.card a[href*="dashboard.php"] {
+    font-size: 1.5rem;
+    margin-top: 40px;
+    display: inline-block;
+    padding: 12px 25px;
+    background: #0077b6; /* Blue Back Button */
+    color: white;
+    border-radius: 8px;
+}
